@@ -12,19 +12,19 @@ workflows:
           name: GHC 8.4.4
           executor: haskell/ghc-8_4_4
           context: haskell-ci
-          binary-cache-uri: ${BINARY_CACHE_URI-"http://l3lpeyqqbh.s3-website-us-west-2.amazonaws.com/archive"}
+          binary-cache-uri: s3://hw-binary-cache-public-us-east-1/archive
 
       - haskell/build:
           name: GHC 8.6.4
           executor: haskell/ghc-8_6_4
           context: haskell-ci
-          binary-cache-uri: ${BINARY_CACHE_URI-"http://l3lpeyqqbh.s3-website-us-west-2.amazonaws.com/archive"}
+          binary-cache-uri: s3://hw-binary-cache-public-us-east-1/archive
 
       - haskell/build:
           name: GHC 7.10.3
           executor: haskell/ghc-7_10_3
           context: haskell-ci
-          binary-cache-uri: ${BINARY_CACHE_URI-"http://l3lpeyqqbh.s3-website-us-west-2.amazonaws.com/archive"}
+          binary-cache-uri: s3://hw-binary-cache-public-us-east-1/archive
 
       - github/release-cabal:
           context: haskell-ci
