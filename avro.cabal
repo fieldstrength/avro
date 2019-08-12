@@ -1,4 +1,4 @@
-cabal-version: 1.12
+cabal-version:  2.2
 
 name:           avro
 version:        0.4.5.1
@@ -9,7 +9,7 @@ homepage:       https://github.com/haskell-works/avro#readme
 bug-reports:    https://github.com/haskell-works/avro/issues
 author:         Thomas M. DuBuisson
 maintainer:     Alexey Raga <alexey.raga@gmail.com>
-license:        BSD3
+license:        BSD-3-Clause
 license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
@@ -156,7 +156,8 @@ test-suite test
       DecodeContainer
       Example1
       Paths_avro
-  hs-source-dirs: test
+  autogen-modules:    Paths_avro
+  hs-source-dirs:     test
   build-depends:
       QuickCheck
     , aeson
