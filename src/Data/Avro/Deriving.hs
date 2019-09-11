@@ -507,14 +507,15 @@ mkFieldTypeName namespaceBehavior = \case
   t                  -> error $ "Avro type is not supported: " <> show t
   where go = mkFieldTypeName namespaceBehavior
         union = \case
-          [Null, x]       -> [t| Maybe $(go x) |]
-          [x, Null]       -> [t| Maybe $(go x) |]
-          [x, y]          -> [t| Either $(go x) $(go y) |]
-          [a, b, c]       -> [t| Either3 $(go a) $(go b) $(go c) |]
-          [a, b, c, d]    -> [t| Either4 $(go a) $(go b) $(go c) $(go d) |]
-          [a, b, c, d, e] -> [t| Either5 $(go a) $(go b) $(go c) $(go d) $(go e) |]
-          _               ->
-            error "Unions with more than 5 elements are not yet supported"
+          [Null, x]          -> [t| Maybe $(go x) |]
+          [x, Null]          -> [t| Maybe $(go x) |]
+          [x, y]             -> [t| Either $(go x) $(go y) |]
+          [a, b, c]          -> [t| Either3 $(go a) $(go b) $(go c) |]
+          [a, b, c, d]       -> [t| Either4 $(go a) $(go b) $(go c) $(go d) |]
+          [a, b, c, d, e]    -> [t| Either5 $(go a) $(go b) $(go c) $(go d) $(go e) |]
+          [a, b, c, d, e, f] -> [t| Either6 $(go a) $(go b) $(go c) $(go d) $(go e) $(go f) |]
+          _                  ->
+            error "Unions with more than 6 elements are not yet supported"
 
 updateFirst :: (Text -> Text) -> Text -> Text
 updateFirst f t =
