@@ -36,6 +36,10 @@ data Either9 a b c d e f g h i = E9_1 a | E9_2 b | E9_3 c | E9_4 d | E9_5 e | E9
 
 data Either10 a b c d e f g h i j = E10_1 a | E10_2 b | E10_3 c | E10_4 d | E10_5 e | E10_6 f | E10_7 g | E10_8 h | E10_9 i | E10_10 j deriving (Eq, Ord, Show, Generic, Functor, Foldable, Traversable)
 
+data Either11 a b c d e f g h i j k = E11_1 a | E11_2 b | E11_3 c | E11_4 d | E11_5 e | E11_6 f | E11_7 g | E11_8 h | E11_9 i | E11_10 j | E11_11 k deriving (Eq, Ord, Show, Generic, Functor, Foldable, Traversable)
+
+data Either12 a b c d e f g h i j k l = E12_1 a | E12_2 b | E12_3 c | E12_4 d | E12_5 e | E12_6 f | E12_7 g | E12_8 h | E12_9 i | E12_10 j | E12_11 k | E12_12 l deriving (Eq, Ord, Show, Generic, Functor, Foldable, Traversable)
+
 instance Applicative (Either3 a b) where
   pure = E3_3
   E3_1 a <*> _ = E3_1 a
@@ -514,6 +518,35 @@ instance (FromAvro a, FromAvro b, FromAvro c, FromAvro d, FromAvro e, FromAvro f
   fromAvro (AV.Union _ 9 j) = E10_10 <$> fromAvro j
   fromAvro (AV.Union _ n _) = Left ("Unable to decode Either10 from a position #" <> show n)
 
+instance (FromAvro a, FromAvro b, FromAvro c, FromAvro d, FromAvro e, FromAvro f, FromAvro g, FromAvro h, FromAvro i, FromAvro j, FromAvro k) => FromAvro (Either11 a b c d e f g h i j k) where
+  fromAvro (AV.Union _ 0 a) = E11_1  <$> fromAvro a
+  fromAvro (AV.Union _ 1 b) = E11_2  <$> fromAvro b
+  fromAvro (AV.Union _ 2 c) = E11_3  <$> fromAvro c
+  fromAvro (AV.Union _ 3 d) = E11_4  <$> fromAvro d
+  fromAvro (AV.Union _ 4 e) = E11_5  <$> fromAvro e
+  fromAvro (AV.Union _ 5 f) = E11_6  <$> fromAvro f
+  fromAvro (AV.Union _ 6 g) = E11_7  <$> fromAvro g
+  fromAvro (AV.Union _ 7 h) = E11_8  <$> fromAvro h
+  fromAvro (AV.Union _ 8 i) = E11_9  <$> fromAvro i
+  fromAvro (AV.Union _ 9 j) = E11_10 <$> fromAvro j
+  fromAvro (AV.Union _ 10 k) = E11_11 <$> fromAvro k
+  fromAvro (AV.Union _ n _) = Left ("Unable to decode Either11 from a position #" <> show n)
+
+instance (FromAvro a, FromAvro b, FromAvro c, FromAvro d, FromAvro e, FromAvro f, FromAvro g, FromAvro h, FromAvro i, FromAvro j, FromAvro k, FromAvro l) => FromAvro (Either12 a b c d e f g h i j k l) where
+  fromAvro (AV.Union _ 0 a) = E12_1  <$> fromAvro a
+  fromAvro (AV.Union _ 1 b) = E12_2  <$> fromAvro b
+  fromAvro (AV.Union _ 2 c) = E12_3  <$> fromAvro c
+  fromAvro (AV.Union _ 3 d) = E12_4  <$> fromAvro d
+  fromAvro (AV.Union _ 4 e) = E12_5  <$> fromAvro e
+  fromAvro (AV.Union _ 5 f) = E12_6  <$> fromAvro f
+  fromAvro (AV.Union _ 6 g) = E12_7  <$> fromAvro g
+  fromAvro (AV.Union _ 7 h) = E12_8  <$> fromAvro h
+  fromAvro (AV.Union _ 8 i) = E12_9  <$> fromAvro i
+  fromAvro (AV.Union _ 9 j) = E12_10 <$> fromAvro j
+  fromAvro (AV.Union _ 10 k) = E12_11 <$> fromAvro k
+  fromAvro (AV.Union _ 11 l) = E12_12 <$> fromAvro l
+  fromAvro (AV.Union _ n _) = Left ("Unable to decode Either12 from a position #" <> show n)
+
 putIndexedValue :: ToAvro a => Int -> V.Vector Schema -> a -> Builder
 putIndexedValue i opts x = putI i <> toAvro (V.unsafeIndex opts i) x
 {-# INLINE putIndexedValue #-}
@@ -625,3 +658,41 @@ instance (ToAvro a, ToAvro b, ToAvro c, ToAvro d, ToAvro e, ToAvro f, ToAvro g, 
         E10_10 x -> putIndexedValue 9 opts x
       else  error ("Unable to encode Either10 as " <> show opts)
   toAvro s _ = error ("Unable to encode Either10 as " <> show s)
+
+instance (ToAvro a, ToAvro b, ToAvro c, ToAvro d, ToAvro e, ToAvro f, ToAvro g, ToAvro h, ToAvro i, ToAvro j, ToAvro k) => ToAvro (Either11 a b c d e f g h i j k) where
+  toAvro (S.Union opts) v =
+    if V.length opts == 11
+      then case v of
+        E11_1 x  -> putIndexedValue 0 opts x
+        E11_2 x  -> putIndexedValue 1 opts x
+        E11_3 x  -> putIndexedValue 2 opts x
+        E11_4 x  -> putIndexedValue 3 opts x
+        E11_5 x  -> putIndexedValue 4 opts x
+        E11_6 x  -> putIndexedValue 5 opts x
+        E11_7 x  -> putIndexedValue 6 opts x
+        E11_8 x  -> putIndexedValue 7 opts x
+        E11_9 x  -> putIndexedValue 8 opts x
+        E11_10 x -> putIndexedValue 9 opts x
+        E11_11 x -> putIndexedValue 10 opts x
+      else  error ("Unable to encode Either11 as " <> show opts)
+  toAvro s _ = error ("Unable to encode Either11 as " <> show s)
+
+instance (ToAvro a, ToAvro b, ToAvro c, ToAvro d, ToAvro e, ToAvro f, ToAvro g, ToAvro h, ToAvro i, ToAvro j, ToAvro k, ToAvro l) => ToAvro (Either12 a b c d e f g h i j k l) where
+  toAvro (S.Union opts) v =
+    if V.length opts == 12
+      then case v of
+        E12_1 x  -> putIndexedValue 0 opts x
+        E12_2 x  -> putIndexedValue 1 opts x
+        E12_3 x  -> putIndexedValue 2 opts x
+        E12_4 x  -> putIndexedValue 3 opts x
+        E12_5 x  -> putIndexedValue 4 opts x
+        E12_6 x  -> putIndexedValue 5 opts x
+        E12_7 x  -> putIndexedValue 6 opts x
+        E12_8 x  -> putIndexedValue 7 opts x
+        E12_9 x  -> putIndexedValue 8 opts x
+        E12_10 x -> putIndexedValue 9 opts x
+        E12_11 x -> putIndexedValue 10 opts x
+        E12_12 x -> putIndexedValue 11 opts x
+      else  error ("Unable to encode Either12 as " <> show opts)
+  toAvro s _ = error ("Unable to encode Either12 as " <> show s)
+
