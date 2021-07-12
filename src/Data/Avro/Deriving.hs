@@ -480,8 +480,9 @@ mkFieldTypeName namespaceBehavior = \case
           [a, b, c, d, e, f, g, h, i, j] -> [t| Either10 $(go a) $(go b) $(go c) $(go d) $(go e) $(go f) $(go g) $(go h) $(go i) $(go j)|]
           [a, b, c, d, e, f, g, h, i, j, k] -> [t| Either11 $(go a) $(go b) $(go c) $(go d) $(go e) $(go f) $(go g) $(go h) $(go i) $(go j) $(go k) |]
           [a, b, c, d, e, f, g, h, i, j, k, l] -> [t| Either12 $(go a) $(go b) $(go c) $(go d) $(go e) $(go f) $(go g) $(go h) $(go i) $(go j) $(go k) $(go l) |]
+          [a, b, c, d, e, f, g, h, i, j, k, l, m] -> [t| Either13 $(go a) $(go b) $(go c) $(go d) $(go e) $(go f) $(go g) $(go h) $(go i) $(go j) $(go k) $(go l) $(go m) |]
           ls              ->
-            error $ "Unions with more than 12 elements are not yet supported: Union has " <> (show . length) ls <> " elements"
+            error $ "Unions with more than 13 elements are not yet supported: Union has " <> (show . length) ls <> " elements"
 
 updateFirst :: (Text -> Text) -> Text -> Text
 updateFirst f t =
