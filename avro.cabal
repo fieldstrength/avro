@@ -272,15 +272,3 @@ benchmark bench-time
                         Bench.Encoding
   hs-source-dirs:       bench
 
-test-suite doctest
-  import:               base, config
-                      , doctest
-                      , bytestring
-                      , doctest-discover
-                      , zlib
-  build-depends: avro
-  type:                 exitcode-stdio-1.0
-  ghc-options:          -threaded -rtsopts -with-rtsopts=-N
-  main-is:              DoctestDriver.hs
-  HS-Source-Dirs:       doctest
-  build-tool-depends:   doctest-discover:doctest-discover
