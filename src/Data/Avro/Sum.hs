@@ -59,6 +59,30 @@ instance (Show x, Show (NSum xs)) => Show (NSum (x : xs)) where
 
     where precedence = 10
 
+
+----------------------------- Construction helper ------------------------------
+
+makeNSum :: HasElem t ts => t -> NSum ts
+makeNSum = makeNSumExplicit elementProof
+
+makeNSumExplicit :: Elem t ts -> t -> NSum ts
+makeNSumExplicit Here       x = Start x
+makeNSumExplicit (There el) x = Next (makeNSumExplicit el x)
+
+data Elem :: Type -> [Type] -> Type where
+  Here :: Elem t (t : ts)
+  There :: Elem t ts -> Elem t (y : ts)
+
+class HasElem (t :: Type) (ts :: [Type]) where
+  elementProof :: Elem t ts
+
+instance HasElem t (t : ts) where
+  elementProof = Here
+
+instance {-# OVERLAPPABLE #-} HasElem t ts => HasElem t (x : ts) where
+  elementProof = There elementProof
+
+
 ------------------------ ToAvro ------------------------
 
 
@@ -111,8 +135,7 @@ runParsers parsers i val = case parsers of
     EQ -> Start <$> parser val
     GT -> Next <$> runParsers ps (pred i) val
 
--- | If all the xs have FromAvro, then we can have the vector (of size length xs)
---   of all its parsers.
+-- | If all the xs have FromAvro, then we can have the vector (of length xs) of all its parsers.
 --   The need for the 'Shape' singleton witness is a technicality: It gives no info
 --   but it reflects the type-level data about the list to the value level.
 --   This argument will be magicked away with a type class.
@@ -143,29 +166,6 @@ instance                HasShape '[]      where theShape = ShapeZ
 instance HasShape xs => HasShape (x : xs) where theShape = ShapeS theShape
 
 
------------------------------ Utils ------------------------------
-
-data Elem :: Type -> [Type] -> Type where
-  Here :: Elem t (t : ts)
-  There :: Elem t ts -> Elem t (y : ts)
-
-class HasElem (t :: Type) (ts :: [Type]) where
-  elementProof :: Elem t ts
-
-instance HasElem t (t : ts) where
-  elementProof = Here
-
-instance {-# OVERLAPPABLE #-} HasElem t ts => HasElem t (x : ts) where
-  elementProof = There elementProof
-
-makeNSumExplicit :: Elem t ts -> t -> NSum ts
-makeNSumExplicit Here x = Start x
-makeNSumExplicit (There el) x = Next (makeNSumExplicit el x)
-
-makeNSum :: HasElem t ts => t -> NSum ts
-makeNSum = makeNSumExplicit elementProof
-
-
 ----------------------------- HasAvroSchema ------------------------------
 
 instance forall x xs. (All HasAvroSchema (x : xs), HasShape xs) => HasAvroSchema (NSum (x : xs)) where
@@ -190,4 +190,5 @@ schemasFromShape :: All HasAvroSchema xs => Shape xs -> Schemas xs
 schemasFromShape = \case
   ShapeZ   -> SchemaZ
   ShapeS s -> SchemaS schema $ schemasFromShape s
+
 
