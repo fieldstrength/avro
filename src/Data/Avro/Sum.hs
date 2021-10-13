@@ -25,10 +25,12 @@ import           Data.Avro.Encoding.ToAvro    (ToAvro (..))
 import           Data.Avro.Internal.EncodeRaw (putI)
 import           Data.Avro.Schema.Schema      as S
 import           Data.ByteString.Builder      (Builder)
+import           Data.List.NonEmpty           (NonEmpty (..))
+import           Data.Tagged                  (Tagged (..))
 import qualified Data.Vector                  as V
-import           Data.Kind (Type, Constraint)
-import           Data.Proxy
-import           GHC.TypeLits (KnownNat, natVal, Nat, type (+))
+import           Data.Kind                    (Type, Constraint)
+import           Data.Proxy                   (Proxy (..))
+import           GHC.TypeLits                 (KnownNat, natVal, Nat, type (+))
 
 -- | N-ary sum type. Used for modelling unions.
 data NSum :: [Type] -> Type where
@@ -162,3 +164,30 @@ makeNSumExplicit (There el) x = Next (makeNSumExplicit el x)
 
 makeNSum :: HasElem t ts => t -> NSum ts
 makeNSum = makeNSumExplicit elementProof
+
+
+----------------------------- HasAvroSchema ------------------------------
+
+instance forall x xs. (All HasAvroSchema (x : xs), HasShape xs) => HasAvroSchema (NSum (x : xs)) where
+  schema = Tagged $ mkUnion $
+    unTagged (schema @x) :| schemasToList (theSchemas @xs)
+
+theSchemas :: (All HasAvroSchema xs, HasShape xs) => Schemas xs
+theSchemas = schemasFromShape theShape
+
+-- | The set of Tagged Schemas that match the list of types
+--   Use of this type helps ensure the correctness of the HasAvroSchema instance.
+data Schemas :: [Type] -> Type where
+  SchemaZ :: Schemas '[]
+  SchemaS :: Tagged x Schema -> Schemas xs -> Schemas (x : xs)
+
+schemasToList :: Schemas xs -> [Schema]
+schemasToList = \case
+  SchemaZ               -> []
+  SchemaS (Tagged s) ss -> s : schemasToList ss
+
+schemasFromShape :: All HasAvroSchema xs => Shape xs -> Schemas xs
+schemasFromShape = \case
+  ShapeZ   -> SchemaZ
+  ShapeS s -> SchemaS schema $ schemasFromShape s
+
