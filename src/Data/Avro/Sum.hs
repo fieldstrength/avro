@@ -90,9 +90,11 @@ instance (All ToAvro xs, Length xs ~ n, KnownNat n) => ToAvro (NSum xs) where
   toAvro :: Schema -> NSum xs -> Builder
   toAvro (S.Union opts) ns =
     if nsLength ns == V.length opts
-      then putI (nsOffset ns) <> mkAvro (V.unsafeIndex opts $ nsOffset ns)
-      else error $ "Unable to encode NSum as " <> show opts
+      then putI offset <> mkAvro (V.unsafeIndex opts offset)
+      else error $ "Unable to encode NSum as the union of " <> show opts
     where
+      offset = nsOffset ns
+
       mkAvro = extractAvroBuilder ns
 
       extractAvroBuilder :: All ToAvro ts => NSum ts -> Schema -> Builder
