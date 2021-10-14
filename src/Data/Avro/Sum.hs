@@ -69,6 +69,7 @@ makeNSumExplicit :: Elem t ts -> t -> NSum ts
 makeNSumExplicit Here       x = Start x
 makeNSumExplicit (There el) x = Next (makeNSumExplicit el x)
 
+-- | @Elem x xs@ is a proof that x is an element of the list xs.
 data Elem :: Type -> [Type] -> Type where
   Here :: Elem t (t : ts)
   There :: Elem t ts -> Elem t (y : ts)
@@ -90,17 +91,15 @@ instance (All ToAvro xs, Length xs ~ n, KnownNat n) => ToAvro (NSum xs) where
   toAvro :: Schema -> NSum xs -> Builder
   toAvro (S.Union opts) ns =
     if nsLength ns == V.length opts
-      then putI offset <> mkAvro (V.unsafeIndex opts offset)
+      then putI index <> avroBuilder ns (V.unsafeIndex opts index)
       else error $ "Unable to encode NSum as the union of " <> show opts
     where
-      offset = nsOffset ns
+      index = nsIndex ns
 
-      mkAvro = extractAvroBuilder ns
-
-      extractAvroBuilder :: All ToAvro ts => NSum ts -> Schema -> Builder
-      extractAvroBuilder = \case
+      avroBuilder :: All ToAvro ts => NSum ts -> Schema -> Builder
+      avroBuilder = \case
         Start x -> flip toAvro x
-        Next n  -> extractAvroBuilder n
+        Next n  -> avroBuilder n
 
   toAvro s _ns = error $ "Unable to encode an NSum as " <> show s
 
@@ -113,12 +112,11 @@ type family Length (xs :: [k]) :: Nat where
 nsLength :: forall xs n. (Length xs ~ n, KnownNat n) => NSum xs -> Int
 nsLength _ = fromIntegral $ natVal (Proxy @n)
 
--- | How many "moves" away from the first type in the list is the one in the NSum value
-nsOffset :: NSum ts -> Int
-nsOffset = \case
+-- | The index of the NSum's value among the type list
+nsIndex :: NSum ts -> Int
+nsIndex = \case
   Start _  -> 0
-  Next ns -> succ (nsOffset ns)
-
+  Next ns -> succ (nsIndex ns)
 
 
 ------------------------ FromAvro ------------------------
