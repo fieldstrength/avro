@@ -95,7 +95,7 @@ decodeValueWithSchema :: FromAvro a => ReadSchema -> BL.ByteString -> Either Str
 decodeValueWithSchema schema payload =
   case runGetOrFail (getValue schema) payload of
     Right (bs, _, v) -> fromAvro v
-    Left (_, _, e)   -> Left e
+    Left (_unconsumed, bytesConsumed, err) -> Left $ unwords ["Failed after ", show bytesConsumed, "bytes:", err]
 
 -- | Deserialises an individual value from Avro using the schema from its coresponding 'HasAvroSchema'.
 --
