@@ -13,7 +13,7 @@ module Data.Avro.Encoding.FromAvro
 where
 
 import           Control.DeepSeq             (NFData)
-import           Control.Monad               (forM, replicateM)
+import           Control.Monad               (forM, replicateM, void, when)
 import           Control.Monad.Identity      (Identity (..))
 import           Control.Monad.ST            (ST)
 import qualified Data.Aeson                  as A
@@ -300,11 +300,14 @@ getField env sch = case sch of
 
 getKVBlocks :: HashMap Schema.TypeName ReadSchema -> ReadSchema -> Get [[(Text, Value)]]
 getKVBlocks env t = do
-  blockLength <- abs <$> Get.getLong
-  if blockLength == 0
-  then return []
-  else do vs <- replicateM (fromIntegral blockLength) ((,) <$> Get.getString <*> getField env t)
-          (vs:) <$> getKVBlocks env t
+  lengthIndicator <- Get.getLong
+  if lengthIndicator == 0 then
+    return []
+  else do
+    when (lengthIndicator < 0) $ void $ Get.getLong  -- number of bytes in block
+    let blockLength = abs lengthIndicator
+    vs <- replicateM (fromIntegral blockLength) ((,) <$> Get.getString <*> getField env t)
+    (vs:) <$> getKVBlocks env t
 {-# INLINE getKVBlocks #-}
 
 getBlocksOf :: HashMap Schema.TypeName ReadSchema -> ReadSchema -> Get [[Value]]
